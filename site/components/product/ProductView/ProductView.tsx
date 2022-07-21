@@ -1,5 +1,5 @@
 import cn from 'clsx'
-import Image from 'next/image'
+import ExportedImage from "next-image-export-optimizer";
 import s from './ProductView.module.css'
 import { FC } from 'react'
 import type { Product } from '@commerce/types/product'
@@ -36,7 +36,7 @@ const ProductView: FC<ProductViewProps> = ({ product, relatedProducts }) => {
               <ProductSlider key={product.id}>
                 {product.images.map((image, i) => (
                   <div key={image.url} className={s.imageContainer}>
-                    <Image
+                    <ExportedImage
                       className={s.img}
                       src={image.url!}
                       alt={image.alt || 'Product Image'}

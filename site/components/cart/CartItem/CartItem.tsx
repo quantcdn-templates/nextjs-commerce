@@ -1,6 +1,6 @@
 import { ChangeEvent, FocusEventHandler, useEffect, useState } from 'react'
 import cn from 'clsx'
-import Image from 'next/image'
+import ExportedImage from "next-image-export-optimizer";
 import Link from 'next/link'
 import s from './CartItem.module.css'
 import { useUI } from '@components/ui/context'
@@ -87,7 +87,7 @@ const CartItem = ({
         <div className="w-16 h-16 bg-violet relative overflow-hidden cursor-pointer z-0">
           <Link href={`/product/${item.path}`}>
             <a>
-              <Image
+              <ExportedImage
                 onClick={() => closeSidebarIfPresent()}
                 className={s.productImage}
                 width={150}

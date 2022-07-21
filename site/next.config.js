@@ -7,12 +7,27 @@ const isShopify = provider === '@vercel/commerce-shopify'
 const isSaleor = provider === '@vercel/commerce-saleor'
 const isSwell = provider === '@vercel/commerce-swell'
 const isVendure = provider === '@vercel/commerce-vendure'
+const isLocal = provider === '@vercel/commerce-local'
 
 module.exports = withCommerceConfig({
   commerce,
-  i18n: {
-    locales: ['en-US', 'es'],
-    defaultLocale: 'en-US',
+  images: {
+    loader: "custom",
+    imageSizes: [16, 32, 64, 96, 256],
+    deviceSizes: [640, 750, 1080, 1200, 2048],
+    nextImageExportOptimizer: {
+      imageFolderPath: "public",
+      exportFolderPath: "out",
+      quality: 75,
+    },
+  },
+  env: {
+    optimizeProductImages: isLocal ? true : false,
+    storePicturesInWEBP: true,
+    generateAndUseBlurImages: true,
+  },
+  generateBuildId: async () => {
+    return 'quant-static'
   },
   rewrites() {
     return [
@@ -29,12 +44,27 @@ module.exports = withCommerceConfig({
       // For Vendure, rewrite the local api url to the remote (external) api url. This is required
       // to make the session cookies work.
       isVendure &&
-        process.env.NEXT_PUBLIC_VENDURE_LOCAL_URL && {
-          source: `${process.env.NEXT_PUBLIC_VENDURE_LOCAL_URL}/:path*`,
-          destination: `${process.env.NEXT_PUBLIC_VENDURE_SHOP_API_URL}/:path*`,
-        },
+      process.env.NEXT_PUBLIC_VENDURE_LOCAL_URL && {
+        source: `${process.env.NEXT_PUBLIC_VENDURE_LOCAL_URL}/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_VENDURE_SHOP_API_URL}/:path*`,
+      },
+      // To test API routing via Quant use the NEXT_COMMERCE_API_VIA_QUANT env var.
+      // @todo: Implemented as a redirect, rewrites not overriding existing API paths.
+      process.env.NEXT_COMMERCE_QUANT_API && {
+        source: '/quantapi/:path*',
+        destination: `${process.env.NEXT_COMMERCE_QUANT_API}/:path*` // Proxy to Backend
+      },
     ].filter(Boolean)
   },
+  redirects() {
+    return [
+      process.env.NEXT_COMMERCE_QUANT_API && {
+        source: '/api/:path*',
+        destination: '/quantapi/:path*',
+        permanent: false
+      }
+    ].filter(Boolean)
+  }
 })
 
 // Don't delete this console log, useful to see the commerce config in Vercel deployments
